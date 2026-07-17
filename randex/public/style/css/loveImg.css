@@ -1,0 +1,62 @@
+.img_card {
+  padding: 1.3rem 1.3rem 1.5rem;
+  background: rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  box-sizing: border-box;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  box-shadow:
+    0 10px 28px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  transition:
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 180ms ease-out,
+    background 180ms ease-out;
+}
+
+.love_img img {
+  width: 20rem;
+  height: 25rem;
+  border-radius: 1.15rem;
+  object-fit: cover;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.14);
+  margin-bottom: 1rem;
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.img_card:hover {
+  cursor: url(../cur/hover.cur), pointer;
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow:
+    0 16px 36px rgba(15, 23, 42, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transform: translateY(-2px);
+}
+
+.img_card:hover img {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.16);
+}
+
+.img_card:active {
+  transform: scale(0.985);
+  transition-duration: 100ms;
+}
+
+.love_img .words {
+  text-align: center;
+  font-family: 'Noto Serif SC', serif;
+}
+
+.love_img .words i {
+  font-style: normal;
+  display: block;
+  color: #6b7280;
+  margin-bottom: 0.35rem;
+}
+
+.love_img .words span {
+  color: #1f2937;
+  font-weight: 600;
+}

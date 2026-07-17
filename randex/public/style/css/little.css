@@ -1,0 +1,205 @@
+.central .title {
+  text-align: center;
+}
+
+.central .title h1 {
+  font-size: 2em;
+  font-family: 'Noto Serif SC', serif;
+  font-weight: 700;
+}
+
+/* Vertical feed: one moments card per row */
+.moments-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin: 1rem auto 2rem;
+  box-sizing: border-box;
+}
+
+.moments-card {
+  width: 100%;
+  margin: 0;
+  padding: 1.15rem 1.2rem 1.05rem;
+  border-radius: 1.5rem;
+  backdrop-filter: blur(22px) saturate(1.2);
+  -webkit-backdrop-filter: blur(22px) saturate(1.2);
+  background: rgba(255, 255, 255, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  box-shadow:
+    0 10px 30px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  box-sizing: border-box;
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 180ms ease-out;
+}
+
+.moments-card:hover {
+  box-shadow:
+    0 14px 36px rgba(15, 23, 42, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.moments-empty {
+  text-align: center;
+  color: rgba(70, 70, 70, 0.75);
+  font-family: 'Noto Serif SC', serif;
+  padding: 1.5rem 0.5rem;
+}
+
+.moments-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.moments-avatar {
+  width: 2.55rem !important;
+  height: 2.55rem !important;
+  border-radius: 0.45rem;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+.moments-meta {
+  min-width: 0;
+}
+
+.moments-author {
+  font-family: 'Noto Serif SC', serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #576b95; /* WeChat-ish name blue */
+}
+
+.moments-time {
+  font-size: 0.78rem;
+  color: rgba(80, 80, 80, 0.6);
+  margin-top: 0.12rem;
+}
+
+/* ── Text (说说) ── */
+.moments-text {
+  margin: 0.1rem 0 0.55rem;
+}
+
+.moments-text-body {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 1.02rem;
+  line-height: 1.65;
+  color: #111;
+  letter-spacing: 0.01em;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.moments-expand {
+  margin-top: 0.25rem;
+  border: none;
+  background: transparent;
+  color: #576b95;
+  font-size: 0.92rem;
+  font-family: 'Noto Serif SC', serif;
+  cursor: pointer;
+  padding: 0;
+}
+
+.moments-expand:hover {
+  opacity: 0.85;
+}
+
+/* ── WeChat 九宫格 ── */
+.moments-media {
+  display: grid;
+  gap: 0.28rem;
+  margin-top: 0.45rem;
+  width: min(100%, 268px);
+}
+
+/* 1 image: larger single block */
+.moments-media.m1 {
+  grid-template-columns: 1fr;
+  width: min(100%, 220px);
+}
+
+.moments-media.m1 .moments-media-item {
+  aspect-ratio: 1;
+}
+
+/* 2 or 4 images: 2 columns */
+.moments-media.m2 {
+  grid-template-columns: repeat(2, 1fr);
+  width: min(100%, 188px);
+}
+
+/* 3 / 5–9 images: 3 columns */
+.moments-media.m3 {
+  grid-template-columns: repeat(3, 1fr);
+  width: min(100%, 268px);
+}
+
+.moments-media-item {
+  position: relative;
+  aspect-ratio: 1;
+  border: none;
+  padding: 0;
+  border-radius: 0.2rem;
+  overflow: hidden;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.35);
+  display: block;
+}
+
+.moments-media-item img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  display: block;
+}
+
+.moments-media-overflow {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.moments-foot {
+  margin-top: 0.75rem;
+  padding-top: 0.55rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.45);
+  text-align: right;
+}
+
+.moments-foot a {
+  color: #5b6b7c;
+  font-size: 0.88rem;
+  text-decoration: none;
+  font-family: 'Noto Serif SC', serif;
+}
+
+@media (max-width: 640px) {
+  .moments-card {
+    border-radius: 1.1rem;
+    padding: 0.95rem 0.85rem 0.85rem;
+  }
+
+  .moments-media.m3 {
+    width: min(100%, 72vw);
+  }
+
+  .moments-media.m2 {
+    width: min(100%, 52vw);
+  }
+
+  .moments-media.m1 {
+    width: min(100%, 58vw);
+  }
+}

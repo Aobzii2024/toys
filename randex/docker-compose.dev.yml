@@ -1,0 +1,42 @@
+# 开发热更新：改代码自动生效，无需每次 docker build
+# 用法：
+#   docker compose -f docker-compose.dev.yml up --build
+# 停止生产容器后使用（同端口 3000）：
+#   docker compose down
+#   docker compose -f docker-compose.dev.yml up
+services:
+  app:
+    image: node:22-bookworm-slim
+    working_dir: /app
+    command: bash -lc "npm config set registry https://registry.npmmirror.com && npm install && npm run dev -- -H 0.0.0.0 -p 3000"
+    ports:
+      - "3000:3000"
+    environment:
+      SESSION_SECRET: "2d181446bd98153be72b522c70112e82944b2bde8b2007441fde9fc727079214"
+      ADMIN_USER: yzx
+      ADMIN_PASSWORD: "329664"
+      DATABASE_PATH: "/data/likegirl.db"
+      UPLOAD_DIR: "/data/uploads"
+      SEED_DEMO: "true"
+      COOKIE_SECURE: "false"
+      WATCHPACK_POLLING: "true"
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      # 源码热挂载
+      - .:/app
+      # 避免把宿主机 node_modules 盖进容器（原生模块架构可能不同）
+      - likegirl-dev-node-modules:/app/node_modules
+      # 与生产共用数据卷，留言/设置不丢
+      - likegirl-data:/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  likegirl-data:
+    external: true
+    name: likegirl-next_likegirl-data
+  likegirl-dev-node-modules:

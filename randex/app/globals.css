@@ -1,0 +1,156 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/*
+ * Site design system — translucent materials, soft depth, restrained motion
+ * Inspired by emilkowalski/skills (Apple materials + design-eng taste).
+ */
+:root {
+  --rx-glass: blur(20px) saturate(1.2);
+  --rx-glass-bg: rgba(255, 255, 255, 0.42);
+  --rx-glass-bg-strong: rgba(255, 255, 255, 0.58);
+  --rx-glass-border: rgba(255, 255, 255, 0.55);
+  --rx-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  --rx-shadow-soft: 0 6px 18px rgba(15, 23, 42, 0.06);
+  --rx-radius: 1.5rem;
+  --rx-radius-lg: 2rem;
+  --rx-text: #1f2937;
+  --rx-muted: rgba(71, 85, 105, 0.85);
+  --rx-accent: #576b95;
+  --rx-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Top bar: logo left / slogan right */
+.header-wrap .header {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 1.25rem !important;
+  box-sizing: border-box !important;
+  justify-content: space-between !important;
+  gap: 1rem !important;
+}
+
+.header-wrap .header .logo {
+  flex-shrink: 0;
+}
+
+.header-wrap .header .word {
+  width: auto !important;
+  flex: 1 1 auto !important;
+  min-width: 0;
+  text-align: right !important;
+}
+
+@media (max-width: 768px) {
+  .header-wrap .header {
+    padding-left: 0.85rem !important;
+    padding-right: 0.85rem !important;
+  }
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+.card,
+.card-b {
+  cursor: pointer;
+}
+
+/* Home cards — glass surfaces */
+.card-wrap .card,
+.card-wrap .card-b {
+  backdrop-filter: var(--rx-glass) !important;
+  -webkit-backdrop-filter: var(--rx-glass) !important;
+  background: var(--rx-glass-bg) !important;
+  border: 1px solid var(--rx-glass-border) !important;
+  border-radius: var(--rx-radius) !important;
+  box-shadow: var(--rx-shadow-soft) !important;
+  transition:
+    transform 180ms var(--rx-ease-out),
+    box-shadow 180ms var(--rx-ease-out),
+    background 180ms var(--rx-ease-out) !important;
+}
+
+.card-wrap .card:hover,
+.card-wrap .card-b:hover {
+  transform: translateY(-2px);
+  background: var(--rx-glass-bg-strong) !important;
+  box-shadow: var(--rx-shadow) !important;
+}
+
+.card-wrap .card:active,
+.card-wrap .card-b:active {
+  transform: scale(0.985);
+  transition-duration: 100ms !important;
+}
+
+/* Couple glass panel already uses blur; polish edge */
+.bg-img .middle {
+  border: 1px solid rgba(255, 255, 255, 0.45) !important;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12) !important;
+}
+
+/* Public content titles */
+.central .title h1,
+.text-ce {
+  letter-spacing: -0.02em;
+}
+
+/* Soft press feedback for interactive controls */
+button:not(:disabled):active,
+.admin-btn:not(:disabled):active,
+.tijiao:not(:disabled):active,
+.about-chat-btn:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+/* About fallback */
+.about-script-fallback {
+  list-style: none;
+  padding: 1.25rem;
+  margin: 0;
+}
+
+.about-script-fallback li {
+  margin: 0.75rem 0;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: var(--rx-shadow-soft);
+}
+
+.about-script-fallback .about-btn {
+  display: inline-block;
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  color: #333;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,26 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      SESSION_SECRET: "2d181446bd98153be72b522c70112e82944b2bde8b2007441fde9fc727079214"
+      # Legacy env (unused for login; accounts are yzx/bhr in DB)
+      ADMIN_USER: yzx
+      ADMIN_PASSWORD: "329664"
+      # Quote absolute paths so Git Bash/MSYS does not rewrite /data
+      DATABASE_PATH: "/data/likegirl.db"
+      UPLOAD_DIR: "/data/uploads"
+      SEED_DEMO: "true"
+      # Set to "true" when serving behind HTTPS reverse proxy
+      COOKIE_SECURE: "false"
+    volumes:
+      - likegirl-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  likegirl-data:
