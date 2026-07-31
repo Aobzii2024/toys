@@ -1,0 +1,3 @@
+-keep class org.webrtc.** { *; }
+-keep class com.ctrlai.app.webrtc.** { *; }
+-dontwarn org.webrtc.**
