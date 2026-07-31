@@ -2,9 +2,6 @@ package com.ctrlai.app.webrtc
 
 import android.content.Context
 import android.content.Intent
-import android.media.projection.MediaProjection
-import android.media.projection.MediaProjectionManager
-import android.os.Build
 import android.util.Log
 import com.ctrlai.app.capture.ProjectionService
 import kotlinx.coroutines.CompletableDeferred
@@ -14,16 +11,20 @@ import org.webrtc.DataChannel
 import org.webrtc.EglBase
 import org.webrtc.IceCandidate
 import org.webrtc.MediaConstraints
+import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.PeerConnectionFactory
+import org.webrtc.RtpReceiver
 import org.webrtc.ScreenCapturerAndroid
 import org.webrtc.SessionDescription
 import org.webrtc.SurfaceTextureHelper
+import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
 
 /**
  * WebRTC 会话管理器。负责 PeerConnection 生命周期、屏幕采集、DataChannel。
+ * 基于 io.getstream:stream-webrtc-android（org.webrtc API 封装）。
  * 被控端 startCaptureAndOffer，控制端 createAnswer。
  */
 class PeerConnectionManager(
@@ -43,7 +44,7 @@ class PeerConnectionManager(
         private set
 
     private var capturer: ScreenCapturerAndroid? = null
-    private var videoSource: org.webrtc.VideoSource? = null
+    private var videoSource: VideoSource? = null
     private var audioSource: AudioSource? = null
     private var projectionIntent: Intent? = null
 
@@ -66,29 +67,12 @@ class PeerConnectionManager(
         }
     }
 
-    private fun ensureProjectionActive(): Pair<MediaProjection, MediaProjectionManager> {
-        val mpm = context.getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-        val intent = projectionIntent ?: throw IllegalStateException("缺少屏幕采集授权")
-        val projection = mpm.getMediaProjection(
-            intent.getIntExtra(ProjectionService.EXTRA_RESULT_CODE, 0),
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                @Suppress("DEPRECATION")
-                intent.getParcelableExtra(ProjectionService.EXTRA_RESULT_DATA)!!
-            } else {
-                @Suppress("DEPRECATION")
-                intent.getParcelableExtra(ProjectionService.EXTRA_RESULT_DATA)
-            },
-        )
-        return projection to mpm
-    }
-
     private fun createPeerConnection(): PeerConnection {
-        val config = org.webrtc.PeerConnection.RTCConfiguration(emptyList())
+        val config = PeerConnection.RTCConfiguration(emptyList())
         config.iceServers = listOf(
-            org.webrtc.IceServer.builder("stun:stun.l.google.com:19302").createIceServer(),
+            PeerConnection.IceServer.builder("stun:stun.l.google.com:19302").createIceServer(),
         )
-        val constraints = MediaConstraints()
-        return factory.createPeerConnection(config, constraints, observer())!!
+        return factory.createPeerConnection(config, observer())!!
     }
 
     private fun observer(): PeerConnection.Observer {
@@ -97,14 +81,23 @@ class PeerConnectionManager(
                 onIceCandidate?.invoke(candidate)
             }
 
+            override fun onIceCandidatesRemoved(candidates: Array<IceCandidate>) {}
+
             override fun onIceConnectionChange(state: PeerConnection.IceConnectionState) {
                 onConnectionStateChange?.invoke(state)
             }
 
-            override fun onAddTrack(receiver: org.webrtc.RtpReceiver, streams: MutableList<MediaStream>) {
+            override fun onAddTrack(receiver: RtpReceiver, streams: Array<MediaStream>) {
                 val video = receiver.track() as? VideoTrack
                 video?.let { onRemoteStreamReady?.invoke(it) }
             }
+
+            override fun onAddStream(stream: MediaStream) {
+                val video = stream.videoTracks.firstOrNull()
+                video?.let { onRemoteStreamReady?.invoke(it) }
+            }
+
+            override fun onRemoveStream(stream: MediaStream) {}
 
             override fun onDataChannel(channel: DataChannel) {
                 Log.d(TAG, "onDataChannel")
@@ -115,9 +108,7 @@ class PeerConnectionManager(
             override fun onSignalingChange(state: PeerConnection.SignalingState) {}
             override fun onIceGatheringChange(state: PeerConnection.IceGatheringState) {}
             override fun onIceConnectionReceivingChange(receiving: Boolean) {}
-            override fun onRemoveStream(stream: MediaStream) {}
             override fun onRenegotiationNeeded() {}
-            override fun onAddStream(stream: MediaStream) {}
         }
     }
 
@@ -139,16 +130,21 @@ class PeerConnectionManager(
 
     /** 被控端：开始屏幕采集并添加媒体轨道 */
     fun startScreenCaptureAndAddTracks(): VideoTrack {
-        val (projection, _) = ensureProjectionActive()
+        val intent = projectionIntent
+            ?: throw IllegalStateException("缺少屏幕采集授权")
         val pc = peerConnection ?: createPeerConnection().also { peerConnection = it }
 
         videoSource = factory.createVideoSource(false)
-        capturer = ScreenCapturerAndroid(projection, object : MediaProjection.Callback() {
+        capturer = ScreenCapturerAndroid(intent, object : android.media.projection.MediaProjection.Callback() {
             override fun onStop() {
                 Log.d(TAG, "projection stopped")
             }
         })
-        capturer!!.initialize(SurfaceTextureHelper.create("ScreenCapturerThread", eglBase.eglBaseContext), context)
+        capturer!!.initialize(
+            SurfaceTextureHelper.create("ScreenCapturerThread", eglBase.eglBaseContext),
+            context,
+            videoSource!!.getCapturerObserver(),
+        )
         capturer!!.startCapture(1280, 720, 30)
         val videoTrack = factory.createVideoTrack("screen", videoSource!!)
         pc.addTrack(videoTrack, emptyList())
@@ -177,6 +173,7 @@ class PeerConnectionManager(
         val result = CompletableDeferred<Unit>()
         peerConnection?.setLocalDescription(object : org.webrtc.SdpObserver {
             override fun onCreateSuccess(desc: SessionDescription) {}
+
             override fun onSetSuccess() {
                 result.complete(Unit)
             }
@@ -196,11 +193,13 @@ class PeerConnectionManager(
         val result = CompletableDeferred<Unit>()
         peerConnection?.setRemoteDescription(object : org.webrtc.SdpObserver {
             override fun onCreateSuccess(desc: SessionDescription) {}
+
             override fun onSetSuccess() {
                 result.complete(Unit)
             }
 
             override fun onCreateFailure(error: String) {}
+
             override fun onSetFailure(error: String) {
                 result.completeExceptionally(IllegalStateException(error))
             }

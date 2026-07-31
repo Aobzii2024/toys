@@ -4,7 +4,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocket
-import io.ktor.client.plugins.websocket.send
 import io.ktor.websocket.Frame
 import io.ktor.websocket.WebSocketSession
 import io.ktor.websocket.readText
@@ -31,7 +30,8 @@ class SignalingClient(
     private val httpClient = HttpClient(OkHttp) {
         install(WebSockets)
     }
-    val events = SignalingEventBus()
+    private val bus = SignalingEventBus()
+    val events: kotlinx.coroutines.flow.Flow<SignalingEvent> = bus.events
 
     private var session: WebSocketSession? = null
     private val sendMutex = Mutex()
@@ -59,8 +59,8 @@ class SignalingClient(
         var backoff = 1000L
         while (scope.isActive && !manualClosed) {
             try {
-                httpClient.webSocket(serverUrl) { socket ->
-                    session = socket
+                httpClient.webSocket(serverUrl) {
+                    session = this
                     backoff = 1000L
                     val register = SignalingMessage(
                         type = "register",
@@ -78,7 +78,7 @@ class SignalingClient(
                 }
             } catch (e: Exception) {
                 if (!manualClosed) {
-                    events.emit(SignalingEvent.Error("连接中断: ${e.message}"))
+                    bus.emit(SignalingEvent.Error("连接中断: ${e.message}"))
                 }
             } finally {
                 session = null
@@ -106,16 +106,16 @@ class SignalingClient(
     private fun handleFrame(text: String) {
         val msg = SignalingJson.json.decodeFromString(SignalingMessage.serializer(), text)
         when (msg.type) {
-            "pair-code" -> msg.pairCode?.let { events.emit(SignalingEvent.PairCode(it)) }
-            "registered" -> msg.deviceId?.let { events.emit(SignalingEvent.Registered(it)) }
-            "connected" -> msg.remote?.let { events.emit(SignalingEvent.Connected(it)) }
-            "peer-joined" -> msg.remote?.let { events.emit(SignalingEvent.PeerJoined(it)) }
-            "session-id" -> msg.sessionId?.let { events.emit(SignalingEvent.SessionId(it)) }
-            "offer" -> msg.sdp?.let { events.emit(SignalingEvent.Offer(it)) }
-            "answer" -> msg.sdp?.let { events.emit(SignalingEvent.Answer(it)) }
-            "ice" -> msg.candidate?.let { events.emit(SignalingEvent.Ice(it)) }
-            "error" -> events.emit(SignalingEvent.Error(msg.error ?: "未知错误"))
-            "disconnect" -> events.emit(SignalingEvent.Disconnected)
+            "pair-code" -> msg.pairCode?.let { bus.emit(SignalingEvent.PairCode(it)) }
+            "registered" -> msg.deviceId?.let { bus.emit(SignalingEvent.Registered(it)) }
+            "connected" -> msg.remote?.let { bus.emit(SignalingEvent.Connected(it)) }
+            "peer-joined" -> msg.remote?.let { bus.emit(SignalingEvent.PeerJoined(it)) }
+            "session-id" -> msg.sessionId?.let { bus.emit(SignalingEvent.SessionId(it)) }
+            "offer" -> msg.sdp?.let { bus.emit(SignalingEvent.Offer(it)) }
+            "answer" -> msg.sdp?.let { bus.emit(SignalingEvent.Answer(it)) }
+            "ice" -> msg.candidate?.let { bus.emit(SignalingEvent.Ice(it)) }
+            "error" -> bus.emit(SignalingEvent.Error(msg.error ?: "未知错误"))
+            "disconnect" -> bus.emit(SignalingEvent.Disconnected)
         }
     }
 }

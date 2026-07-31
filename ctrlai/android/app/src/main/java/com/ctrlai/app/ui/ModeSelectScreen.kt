@@ -2,6 +2,7 @@ package com.ctrlai.app.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,8 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CallMade
-import androidx.compose.material.icons.filled.CallReceived
+import androidx.compose.material.icons.automirrored.filled.CallMade
+import androidx.compose.material.icons.automirrored.filled.CallReceived
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -56,7 +57,7 @@ fun ModeSelectScreen(
         ModeCard(
             title = "控制其他设备",
             subtitle = "输入配对码，远程操作对方手机",
-            icon = Icons.Filled.CallMade,
+            icon = Icons.AutoMirrored.Filled.CallMade,
             iconBackground = MaterialTheme.colorScheme.primary,
             onClick = onControllerClick,
         )
@@ -66,7 +67,7 @@ fun ModeSelectScreen(
         ModeCard(
             title = "让其他设备控制我",
             subtitle = "生成配对码，共享屏幕给对方",
-            icon = Icons.Filled.CallReceived,
+            icon = Icons.AutoMirrored.Filled.CallReceived,
             iconBackground = MaterialTheme.colorScheme.secondary,
             onClick = onControlledClick,
         )
