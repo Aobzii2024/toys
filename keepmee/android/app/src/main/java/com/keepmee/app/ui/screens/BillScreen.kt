@@ -2,7 +2,6 @@ package com.keepmee.app.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,16 +17,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.Radar
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,13 +32,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keepmee.app.data.Transaction
 import com.keepmee.app.ui.theme.Ink
-import com.keepmee.app.ui.theme.KeepYellow
 import com.keepmee.app.ui.util.DateUtils
 import com.keepmee.app.ui.util.formatMoney
 import com.keepmee.app.ui.viewmodel.AppViewModel
@@ -146,21 +141,24 @@ private fun BillSummaryCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
-            .background(KeepYellow, RoundedCornerShape(16.dp))
+            .background(
+                Brush.linearGradient(listOf(Color(0xFF3FD8B0), Color(0xFF22B990))),
+                RoundedCornerShape(16.dp)
+            )
             .padding(18.dp)
     ) {
-        Text(if (yearMode) "年结余" else "月结余", fontSize = 13.sp, color = Ink.copy(alpha = 0.7f))
+        Text(if (yearMode) "年结余" else "月结余", fontSize = 13.sp, color = Color.White.copy(alpha = 0.8f))
         Spacer(Modifier.height(6.dp))
-        Text("¥${formatMoney(balance)}", fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Ink)
+        Text("¥${formatMoney(balance)}", fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color.White)
         Spacer(Modifier.height(14.dp))
         Row(modifier = Modifier.fillMaxWidth()) {
             Column(Modifier.weight(1f)) {
-                Text(if (yearMode) "年收入" else "月收入", fontSize = 12.sp, color = Ink.copy(alpha = 0.7f))
-                Text("¥${formatMoney(income)}", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Ink)
+                Text(if (yearMode) "年收入" else "月收入", fontSize = 12.sp, color = Color.White.copy(alpha = 0.8f))
+                Text("¥${formatMoney(income)}", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
             }
             Column(Modifier.weight(1f)) {
-                Text(if (yearMode) "年支出" else "月支出", fontSize = 12.sp, color = Ink.copy(alpha = 0.7f))
-                Text("¥${formatMoney(expense)}", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Ink)
+                Text(if (yearMode) "年支出" else "月支出", fontSize = 12.sp, color = Color.White.copy(alpha = 0.8f))
+                Text("¥${formatMoney(expense)}", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
             }
         }
     }

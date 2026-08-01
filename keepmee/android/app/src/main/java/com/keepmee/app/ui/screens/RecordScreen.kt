@@ -2,7 +2,6 @@ package com.keepmee.app.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,10 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material.icons.outlined.Settings
@@ -30,21 +27,19 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -53,8 +48,7 @@ import com.keepmee.app.data.Categories
 import com.keepmee.app.data.Category
 import com.keepmee.app.data.Transaction
 import com.keepmee.app.ui.theme.Ink
-import com.keepmee.app.ui.theme.KeepYellow
-import com.keepmee.app.ui.theme.LightGrey
+import com.keepmee.app.ui.theme.KeepGreen
 import com.keepmee.app.ui.viewmodel.AppViewModel
 import com.keepmee.app.ui.util.formatMoney
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -75,7 +69,7 @@ fun RecordScreen(
     val scope = rememberCoroutineScope()
     val customIncomes by vm.customIncomes.collectAsStateWithLifecycle()
     val allIncomes = remember(customIncomes) {
-        Categories.incomes + customIncomes.map { Category(it, Icons.Outlined.Star, false, editable = true) }
+        Categories.incomes + customIncomes.map { Category(it, Icons.Outlined.Star, false, com.keepmee.app.ui.theme.KeepGreen, editable = true) }
     }
 
     val categories = if (isExpense) Categories.expenses else allIncomes
@@ -107,18 +101,20 @@ fun RecordScreen(
 
     Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
         Column(modifier = Modifier.fillMaxSize().imePadding()) {
-            // 黄色顶栏：支出/收入切换 + 取消
+            // 绿色顶栏：支出/收入切换 + 取消
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(KeepYellow)
+                    .background(
+                        Brush.linearGradient(listOf(Color(0xFF3FD8B0), Color(0xFF22B990)))
+                    )
                     .padding(horizontal = 12.dp)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Spacer(Modifier.height(8.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         TextButton(onClick = { onClose() }) {
-                            Text("取消", color = Ink, fontSize = 16.sp)
+                            Text("取消", color = Color.White, fontSize = 16.sp)
                         }
                         Spacer(Modifier.weight(1f))
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -178,7 +174,7 @@ fun RecordScreen(
                     )
                 }
                 items(if (isExpense) listOf<Category>() else listOf(
-                    Category("设置", Icons.Outlined.Settings, false, editable = true)
+                    Category("设置", Icons.Outlined.Settings, false, com.keepmee.app.ui.theme.KeepGreen, editable = true)
                 )) { cat ->
                     CategoryCell(
                         cat = cat,
@@ -218,7 +214,7 @@ fun RecordScreen(
                     .padding(horizontal = 16.dp, vertical = 12.dp)
                     .height(52.dp),
                 shape = RoundedCornerShape(26.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = KeepYellow, contentColor = Ink)
+                colors = ButtonDefaults.buttonColors(containerColor = KeepGreen, contentColor = Color.White)
             ) {
                 Text("保存${if (isExpense) "支出" else "收入"} ¥${amountText.ifBlank { "0" }}", fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
@@ -232,7 +228,7 @@ private fun TabChip(text: String, active: Boolean, onClick: () -> Unit) {
         text = text,
         fontSize = 18.sp,
         fontWeight = if (active) FontWeight.Bold else FontWeight.Normal,
-        color = if (active) Ink else Ink.copy(alpha = 0.5f),
+        color = if (active) Color.White else Color.White.copy(alpha = 0.6f),
         modifier = Modifier
             .padding(vertical = 4.dp)
             .clickable(onClick = onClick),
@@ -241,9 +237,9 @@ private fun TabChip(text: String, active: Boolean, onClick: () -> Unit) {
     if (active) {
         Box(
             modifier = Modifier
-                .width(20.dp)
+                .width(22.dp)
                 .height(3.dp)
-                .background(Ink, RoundedCornerShape(2.dp))
+                .background(Color.White, RoundedCornerShape(2.dp))
         )
     }
 }
@@ -254,6 +250,7 @@ fun CategoryCell(
     selected: Boolean,
     onClick: () -> Unit
 ) {
+    val tileColor = if (selected) KeepGreen else cat.color
     Column(
         modifier = Modifier
             .padding(6.dp)
@@ -262,17 +259,14 @@ fun CategoryCell(
     ) {
         Box(
             modifier = Modifier
-                .size(52.dp)
-                .background(
-                    color = if (selected) KeepYellow else LightGrey,
-                    shape = CircleShape
-                ),
+                .size(50.dp)
+                .background(tileColor, RoundedCornerShape(14.dp)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 cat.icon,
                 contentDescription = cat.name,
-                tint = Ink,
+                tint = Color.White,
                 modifier = Modifier.size(26.dp)
             )
         }

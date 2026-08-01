@@ -7,18 +7,18 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-val KeepYellow = Color(0xFFFFD33D)
-val KeepYellowDark = Color(0xFFF5B800)
-val Ink = Color(0xFF3E3E3E)
-val LightGrey = Color(0xFFF4F4F4)
+val KeepGreen = Color(0xFF31D2A8)
+val KeepGreenDark = Color(0xFF1FA98A)
+val Ink = Color(0xFF2E3A3A)
+val LightGrey = Color(0xFFF4F6F5)
 
 private val LightColors = lightColorScheme(
-    primary = KeepYellowDark,
-    onPrimary = Ink,
-    primaryContainer = KeepYellow,
-    onPrimaryContainer = Ink,
+    primary = KeepGreenDark,
+    onPrimary = Color.White,
+    primaryContainer = KeepGreen,
+    onPrimaryContainer = Color.White,
     secondary = Color(0xFF666666),
-    background = Color.White,
+    background = Color(0xFFF7F8FA),
     surface = Color.White,
     surfaceVariant = LightGrey,
     onSurface = Ink,
@@ -26,10 +26,10 @@ private val LightColors = lightColorScheme(
 )
 
 private val DarkColors = darkColorScheme(
-    primary = KeepYellowDark,
-    onPrimary = Ink,
-    primaryContainer = Color(0xFF4A3F00),
-    onPrimaryContainer = KeepYellow,
+    primary = KeepGreenDark,
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFF0E3B30),
+    onPrimaryContainer = KeepGreen,
     background = Color(0xFF121212),
     surface = Color(0xFF1E1E1E),
     surfaceVariant = Color(0xFF2A2A2A),

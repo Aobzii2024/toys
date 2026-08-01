@@ -37,63 +37,86 @@ import androidx.compose.material.icons.outlined.AddCard
 import androidx.compose.material.icons.outlined.Casino
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.MoreHoriz
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 
 data class Category(
     val name: String,
     val icon: ImageVector,
     val isExpense: Boolean,
+    val color: Color,
     val editable: Boolean = false
 )
 
+private val C_ORANGE = Color(0xFFFFA15C)
+private val C_RED = Color(0xFFFF7A7A)
+private val C_BLUE = Color(0xFF6BB8FF)
+private val C_GREEN = Color(0xFF6BD49C)
+private val C_TEAL = Color(0xFF53D6C8)
+private val C_PURPLE = Color(0xFFB79BFF)
+private val C_PINK = Color(0xFFFF8FB6)
+private val C_AMBER = Color(0xFFFFC35C)
+private val C_CYAN = Color(0xFF57D3E8)
+private val C_INDIGO = Color(0xFF8FA1FF)
+private val C_BROWN = Color(0xFFC9A17E)
+private val C_GREY = Color(0xFFA8B3B8)
+
+private val expenseColors = listOf(C_ORANGE, C_RED, C_BLUE, C_GREEN, C_TEAL, C_PURPLE, C_PINK, C_AMBER, C_CYAN, C_INDIGO, C_BROWN, C_GREY)
+
 object Categories {
+    private fun expenseCat(name: String, icon: ImageVector, index: Int) =
+        Category(name, icon, true, expenseColors[index % expenseColors.size])
+
     val expenses = listOf(
-        Category("餐饮", Icons.Outlined.Restaurant, true),
-        Category("购物", Icons.Outlined.LocalMall, true),
-        Category("日用", Icons.Outlined.ShoppingBag, true),
-        Category("交通", Icons.Outlined.DirectionsBus, true),
-        Category("蔬菜", Icons.Outlined.Fastfood, true),
-        Category("水果", Icons.Outlined.LocalDrink, true),
-        Category("零食", Icons.Outlined.Fastfood, true),
-        Category("运动", Icons.Outlined.SportsSoccer, true),
-        Category("娱乐", Icons.Outlined.SportsEsports, true),
-        Category("通讯", Icons.Outlined.Phone, true),
-        Category("服饰", Icons.Outlined.Checkroom, true),
-        Category("美容", Icons.Outlined.Favorite, true),
-        Category("住房", Icons.Outlined.Home, true),
-        Category("居家", Icons.Outlined.PhotoCamera, true),
-        Category("孩子", Icons.Outlined.ChildCare, true),
-        Category("长辈", Icons.Outlined.VolunteerActivism, true),
-        Category("社交", Icons.Outlined.Groups, true),
-        Category("旅行", Icons.Outlined.Flight, true),
-        Category("烟酒", Icons.Outlined.WineBar, true),
-        Category("数码", Icons.Outlined.Phone, true),
-        Category("汽车", Icons.Outlined.DirectionsCar, true),
-        Category("医疗", Icons.Outlined.LocalHospital, true),
-        Category("书籍", Icons.Outlined.MenuBook, true),
-        Category("学习", Icons.Outlined.Lightbulb, true),
-        Category("宠物", Icons.Outlined.Pets, true),
-        Category("礼金", Icons.Outlined.Redeem, true),
-        Category("礼物", Icons.Outlined.Redeem, true),
-        Category("办公", Icons.Outlined.BusinessCenter, true),
-        Category("维修", Icons.Outlined.Build, true),
-        Category("捐赠", Icons.Outlined.VolunteerActivism, true),
-        Category("彩票", Icons.Outlined.Casino, true),
-        Category("亲友", Icons.Outlined.Groups, true),
+        expenseCat("餐饮", Icons.Outlined.Restaurant, 0),
+        expenseCat("购物", Icons.Outlined.LocalMall, 1),
+        expenseCat("日用", Icons.Outlined.ShoppingBag, 2),
+        expenseCat("交通", Icons.Outlined.DirectionsBus, 3),
+        expenseCat("蔬菜", Icons.Outlined.Fastfood, 4),
+        expenseCat("水果", Icons.Outlined.LocalDrink, 5),
+        expenseCat("零食", Icons.Outlined.Fastfood, 6),
+        expenseCat("运动", Icons.Outlined.SportsSoccer, 7),
+        expenseCat("娱乐", Icons.Outlined.SportsEsports, 8),
+        expenseCat("通讯", Icons.Outlined.Phone, 9),
+        expenseCat("服饰", Icons.Outlined.Checkroom, 10),
+        expenseCat("美容", Icons.Outlined.Favorite, 11),
+        expenseCat("住房", Icons.Outlined.Home, 0),
+        expenseCat("居家", Icons.Outlined.PhotoCamera, 1),
+        expenseCat("孩子", Icons.Outlined.ChildCare, 2),
+        expenseCat("长辈", Icons.Outlined.VolunteerActivism, 3),
+        expenseCat("社交", Icons.Outlined.Groups, 4),
+        expenseCat("旅行", Icons.Outlined.Flight, 5),
+        expenseCat("烟酒", Icons.Outlined.WineBar, 6),
+        expenseCat("数码", Icons.Outlined.Phone, 7),
+        expenseCat("汽车", Icons.Outlined.DirectionsCar, 8),
+        expenseCat("医疗", Icons.Outlined.LocalHospital, 9),
+        expenseCat("书籍", Icons.Outlined.MenuBook, 10),
+        expenseCat("学习", Icons.Outlined.Lightbulb, 11),
+        expenseCat("宠物", Icons.Outlined.Pets, 0),
+        expenseCat("礼金", Icons.Outlined.Redeem, 1),
+        expenseCat("礼物", Icons.Outlined.Redeem, 2),
+        expenseCat("办公", Icons.Outlined.BusinessCenter, 3),
+        expenseCat("维修", Icons.Outlined.Build, 4),
+        expenseCat("捐赠", Icons.Outlined.VolunteerActivism, 5),
+        expenseCat("彩票", Icons.Outlined.Casino, 6),
+        expenseCat("亲友", Icons.Outlined.Groups, 7),
     )
 
     val incomes = listOf(
-        Category("工资", Icons.Outlined.Paid, false),
-        Category("兼职", Icons.Outlined.Work, false),
-        Category("理财", Icons.Outlined.MonitorHeart, false),
-        Category("礼金", Icons.Outlined.Redeem, false),
-        Category("其它", Icons.Outlined.MoreHoriz, false),
+        Category("工资", Icons.Outlined.Paid, false, C_GREEN),
+        Category("兼职", Icons.Outlined.Work, false, C_TEAL),
+        Category("理财", Icons.Outlined.MonitorHeart, false, C_INDIGO),
+        Category("礼金", Icons.Outlined.Redeem, false, C_RED),
+        Category("其它", Icons.Outlined.MoreHoriz, false, C_GREY),
     )
 
     fun byName(name: String, isExpense: Boolean): Category? {
         val pool = if (isExpense) expenses else incomes
         return pool.find { it.name == name }
     }
+
+    fun colorFor(name: String, isExpense: Boolean): Color =
+        byName(name, isExpense)?.color ?: C_GREY
 
     fun iconFor(name: String, isExpense: Boolean): ImageVector =
         byName(name, isExpense)?.icon ?: Icons.Outlined.Star

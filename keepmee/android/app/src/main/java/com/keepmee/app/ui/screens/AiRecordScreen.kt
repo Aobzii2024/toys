@@ -46,7 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keepmee.app.ui.theme.Ink
-import com.keepmee.app.ui.theme.KeepYellow
+import com.keepmee.app.ui.theme.KeepGreen
 import com.keepmee.app.ui.viewmodel.AppViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
@@ -164,7 +164,7 @@ fun AiRecordScreen(vm: AppViewModel, onClose: () -> Unit) {
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            CircularProgressIndicator(color = KeepYellow)
+                            CircularProgressIndicator(color = KeepGreen)
                             Spacer(Modifier.height(8.dp))
                             Text("AI 识别中...", color = Color.White, fontSize = 14.sp)
                         }
@@ -182,7 +182,7 @@ fun AiRecordScreen(vm: AppViewModel, onClose: () -> Unit) {
                     onClick = { cameraLauncher.launch(null) },
                     modifier = Modifier.weight(1f).height(48.dp),
                     shape = RoundedCornerShape(24.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = KeepYellow, contentColor = Ink)
+                    colors = ButtonDefaults.buttonColors(containerColor = KeepGreen, contentColor = Color.White)
                 ) {
                     Icon(Icons.Outlined.PhotoCamera, contentDescription = null)
                     Spacer(Modifier.width(6.dp))
@@ -207,7 +207,7 @@ fun AiRecordScreen(vm: AppViewModel, onClose: () -> Unit) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(KeepYellow.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
+                        .background(KeepGreen.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
                         .padding(16.dp)
                 ) {
                     Text(
@@ -239,7 +239,7 @@ fun AiRecordScreen(vm: AppViewModel, onClose: () -> Unit) {
                         },
                         modifier = Modifier.fillMaxWidth().height(46.dp),
                         shape = RoundedCornerShape(23.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = KeepYellow, contentColor = Ink)
+                        colors = ButtonDefaults.buttonColors(containerColor = KeepGreen, contentColor = Color.White)
                     ) {
                         Text("确认并保存", fontWeight = FontWeight.Bold)
                     }

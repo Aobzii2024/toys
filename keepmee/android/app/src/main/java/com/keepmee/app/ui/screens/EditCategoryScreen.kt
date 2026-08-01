@@ -39,7 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keepmee.app.ui.theme.Ink
-import com.keepmee.app.ui.theme.KeepYellow
+import com.keepmee.app.ui.theme.KeepGreen
 import com.keepmee.app.ui.theme.LightGrey
 import com.keepmee.app.ui.viewmodel.AppViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -54,7 +54,7 @@ fun EditCategoryScreen(vm: AppViewModel, onClose: () -> Unit) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(KeepYellow)
+                    .background(KeepGreen)
                     .padding(horizontal = 12.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {

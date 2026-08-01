@@ -44,10 +44,10 @@ import com.keepmee.app.ui.viewmodel.AppViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 private val pieColors = listOf(
-    Color(0xFFFFD33D), Color(0xFFFF8A65), Color(0xFF81C784),
-    Color(0xFF64B5F6), Color(0xFF9575CD), Color(0xFFF06292),
-    Color(0xFF4DB6AC), Color(0xFFFFB74D), Color(0xFFA1887F),
-    Color(0xFF90A4AE), Color(0xFFE57373), Color(0xFF7986CB)
+    Color(0xFF31D2A8), Color(0xFFFFA15C), Color(0xFFFF7A7A),
+    Color(0xFF6BB8FF), Color(0xFFB79BFF), Color(0xFFFF8FB6),
+    Color(0xFF6BD49C), Color(0xFFFFC35C), Color(0xFF57D3E8),
+    Color(0xFF8FA1FF), Color(0xFFC9A17E), Color(0xFFA8B3B8)
 )
 
 @Composable

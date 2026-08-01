@@ -2,7 +2,6 @@ package com.keepmee.app.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,24 +15,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -41,44 +33,25 @@ import androidx.compose.ui.unit.sp
 import com.keepmee.app.data.Categories
 import com.keepmee.app.data.Transaction
 import com.keepmee.app.ui.theme.Ink
-import com.keepmee.app.ui.theme.KeepYellow
 import com.keepmee.app.ui.theme.LightGrey
 import com.keepmee.app.ui.util.DateUtils
 import com.keepmee.app.ui.util.formatMoney
 import com.keepmee.app.ui.util.signMoney
 import com.keepmee.app.ui.viewmodel.AppViewModel
-import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
-fun HomeScreen(vm: AppViewModel, padding: PaddingValues) {
-    var showRecord by remember { mutableStateOf(false) }
-    var showAi by remember { mutableStateOf(false) }
-    var showEditCat by remember { mutableStateOf(false) }
-    var editingTransaction by remember { mutableStateOf<Transaction?>(null) }
-
+fun HomeScreen(
+    vm: AppViewModel,
+    padding: PaddingValues,
+    onEdit: (Transaction) -> Unit
+) {
     val all by vm.transactions.collectAsStateWithLifecycle()
 
     Box(modifier = Modifier.fillMaxSize().padding(padding)) {
         Column(modifier = Modifier.fillMaxSize()) {
             MonthHeaderCard(all)
-            TransactionList(all = all, onEdit = { editingTransaction = it; showRecord = true })
-        }
-
-        if (showRecord) {
-            RecordScreen(
-                vm = vm,
-                editTarget = editingTransaction,
-                onClose = { showRecord = false; editingTransaction = null },
-                onOpenAi = { showRecord = false; showAi = true },
-                onEditCategory = { showRecord = false; showEditCat = true }
-            )
-        }
-        if (showAi) {
-            AiRecordScreen(vm = vm, onClose = { showAi = false })
-        }
-        if (showEditCat) {
-            EditCategoryScreen(vm = vm, onClose = { showEditCat = false })
+            TransactionList(all = all, onEdit = onEdit)
         }
     }
 }
@@ -96,18 +69,22 @@ private fun MonthHeaderCard(all: List<Transaction>) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(KeepYellow)
-            .padding(horizontal = 20.dp, vertical = 18.dp)
+            .background(
+                Brush.linearGradient(listOf(Color(0xFF3FD8B0), Color(0xFF22B990))),
+                RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)
+            )
+            .padding(horizontal = 24.dp, vertical = 28.dp)
     ) {
-        Text(DateUtils.formatMonth(now), fontSize = 13.sp, color = Ink.copy(alpha = 0.7f))
-        Spacer(Modifier.height(6.dp))
+        Text(DateUtils.formatMonth(now), fontSize = 13.sp, color = Color.White.copy(alpha = 0.85f))
+        Spacer(Modifier.height(8.dp))
         Text(
-            "本月结余 ¥${formatMoney(balance)}",
-            fontSize = 30.sp,
+            "¥${formatMoney(balance)}",
+            fontSize = 34.sp,
             fontWeight = FontWeight.Bold,
-            color = Ink
+            color = Color.White
         )
-        Spacer(Modifier.height(14.dp))
+        Text("本月结余", fontSize = 12.sp, color = Color.White.copy(alpha = 0.75f))
+        Spacer(Modifier.height(18.dp))
         Row(modifier = Modifier.fillMaxWidth()) {
             SummaryItem("收入", income, Modifier.weight(1f))
             SummaryItem("支出", expense, Modifier.weight(1f))
@@ -117,10 +94,14 @@ private fun MonthHeaderCard(all: List<Transaction>) {
 
 @Composable
 private fun SummaryItem(label: String, amount: Double, modifier: Modifier = Modifier) {
-    Column(modifier = modifier) {
-        Text(label, fontSize = 13.sp, color = Ink.copy(alpha = 0.7f))
+    Column(
+        modifier = modifier
+            .background(Color.White.copy(alpha = 0.18f), RoundedCornerShape(14.dp))
+            .padding(horizontal = 14.dp, vertical = 10.dp)
+    ) {
+        Text(label, fontSize = 12.sp, color = Color.White.copy(alpha = 0.85f))
         Spacer(Modifier.height(2.dp))
-        Text("¥${formatMoney(amount)}", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Ink)
+        Text("¥${formatMoney(amount)}", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
     }
 }
 
@@ -178,6 +159,7 @@ private fun TransactionList(
 @Composable
 fun TransactionRow(t: Transaction, onClick: () -> Unit) {
     val cat = Categories.byName(t.category, t.isExpense)
+    val tileColor = cat?.color ?: LightGrey
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -187,15 +169,15 @@ fun TransactionRow(t: Transaction, onClick: () -> Unit) {
     ) {
         Box(
             modifier = Modifier
-                .size(40.dp)
-                .background(LightGrey, CircleShape),
+                .size(42.dp)
+                .background(tileColor, RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 cat?.icon ?: Icons.Outlined.Star,
                 contentDescription = t.category,
-                tint = Ink,
-                modifier = Modifier.size(22.dp)
+                tint = Color.White,
+                modifier = Modifier.size(23.dp)
             )
         }
         Spacer(Modifier.width(12.dp))
@@ -209,7 +191,7 @@ fun TransactionRow(t: Transaction, onClick: () -> Unit) {
             signMoney(t.amount, t.isExpense),
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold,
-            color = if (t.isExpense) Color(0xFF333333) else Color(0xFF2E7D32)
+            color = if (t.isExpense) Color(0xFF333333) else Color(0xFF2E9E6B)
         )
     }
 }

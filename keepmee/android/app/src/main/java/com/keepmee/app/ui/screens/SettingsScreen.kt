@@ -53,7 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.keepmee.app.ai.AiConfig
 import com.keepmee.app.ui.theme.Ink
-import com.keepmee.app.ui.theme.KeepYellow
+import com.keepmee.app.ui.theme.KeepGreen
 import com.keepmee.app.ui.viewmodel.AppViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
@@ -173,7 +173,7 @@ fun SettingsScreen(vm: AppViewModel, padding: PaddingValues) {
                     onClick = {
                         vm.saveAiConfig(AiConfig(baseUrl, apiKey, model))
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = KeepYellow, contentColor = Ink)
+                    colors = ButtonDefaults.buttonColors(containerColor = KeepGreen, contentColor = Color.White)
                 ) {
                     Text("保存")
                 }
