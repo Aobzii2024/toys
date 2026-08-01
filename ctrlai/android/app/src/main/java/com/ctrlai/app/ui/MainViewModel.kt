@@ -411,6 +411,7 @@ class MainViewModel : ViewModel() {
 
     private fun maybeStartControlledSession() {
         if (currentRole != "controlled" || !projectionGranted || webRtcStarted) return
+        if (!_uiState.value.isPeerConnected) return
         val client = signalingClient ?: return
         val manager = ensurePeerManager()
         webRtcStarted = true
