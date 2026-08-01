@@ -4,11 +4,11 @@
   "private": true,
   "description": "ctrlai signaling server for Android remote control",
   "type": "module",
-  "main": "dist/server.js",
+  "main": "dist/main.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "node dist/main.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
