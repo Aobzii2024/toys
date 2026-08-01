@@ -25,6 +25,7 @@ class SignalingClient(
     private val serverUrl: String,
     private val deviceId: String,
     private val deviceName: String,
+    private val pairCode: String? = null,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val httpClient = HttpClient(OkHttp) {
@@ -67,6 +68,7 @@ class SignalingClient(
                         deviceId = deviceId,
                         role = role,
                         name = deviceName,
+                        pairCode = pairCode,
                     )
                     sendRaw(register)
 

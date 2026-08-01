@@ -19,7 +19,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,7 +33,6 @@ fun ModeSelectScreen(
     state: MainUiState,
     onControllerClick: () -> Unit,
     onControlledClick: () -> Unit,
-    onRelayConfigChange: (String, String, String, String) -> Unit = { _, _, _, _ -> },
 ) {
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
@@ -57,51 +55,8 @@ fun ModeSelectScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        OutlinedTextField(
-            value = state.relaySignalingUrl,
-            onValueChange = {
-                onRelayConfigChange(it, state.turnServerUrl, state.turnUsername, state.turnPassword)
-            },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("公网信令地址") },
-            placeholder = { Text("wss://example.com/ws") },
-            singleLine = true,
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
-            value = state.turnServerUrl,
-            onValueChange = {
-                onRelayConfigChange(state.relaySignalingUrl, it, state.turnUsername, state.turnPassword)
-            },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("TURN 地址") },
-            placeholder = { Text("turn:example.com:3478") },
-            singleLine = true,
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(
-                value = state.turnUsername,
-                onValueChange = {
-                    onRelayConfigChange(state.relaySignalingUrl, state.turnServerUrl, it, state.turnPassword)
-                },
-                modifier = Modifier.weight(1f),
-                label = { Text("TURN 用户") },
-                singleLine = true,
-            )
-            OutlinedTextField(
-                value = state.turnPassword,
-                onValueChange = {
-                    onRelayConfigChange(state.relaySignalingUrl, state.turnServerUrl, state.turnUsername, it)
-                },
-                modifier = Modifier.weight(1f),
-                label = { Text("TURN 密码") },
-                singleLine = true,
-            )
-        }
-        Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = if (state.relaySignalingUrl.isBlank()) "当前为局域网/热点模式" else "当前为跨网络中继模式",
+            text = "同一 Wi-Fi/热点优先直连，跨网络自动使用默认中继",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

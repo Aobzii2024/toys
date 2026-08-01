@@ -2,6 +2,7 @@ package com.ctrlai.app.ui
 
 import android.content.Context
 import android.provider.Settings
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -23,6 +24,19 @@ fun MainScreen(
     val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val accessibilityEnabled by remember { mutableStateOf(isAccessibilityEnabled(context)) }
+    BackHandler(enabled = state.isFullScreenMode) {
+        viewModel.toggleFullScreen()
+    }
+    BackHandler(enabled = state.isControlling && !state.isFullScreenMode) {
+        if (state.connectionState == ConnectionState.Failed) {
+            viewModel.resetControllerConnection()
+        } else {
+            viewModel.stopControlling()
+        }
+    }
+    BackHandler(enabled = state.isControlled) {
+        viewModel.stopBeingControlled()
+    }
     CtrlAiTheme {
         Scaffold { padding ->
             Box(modifier = Modifier.padding(padding).fillMaxSize()) {
@@ -49,7 +63,6 @@ fun MainScreen(
                         state = state,
                         onControllerClick = viewModel::startControlling,
                         onControlledClick = viewModel::startBeingControlled,
-                        onRelayConfigChange = viewModel::updateRelayConfig,
                     )
                 }
             }

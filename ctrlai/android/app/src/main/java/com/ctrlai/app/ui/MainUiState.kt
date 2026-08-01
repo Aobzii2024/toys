@@ -19,9 +19,9 @@ data class MainUiState(
     val remoteVideoTrack: VideoTrack? = null,
     val isFullScreenMode: Boolean = false,
     val transferStatus: String? = null,
-    val relaySignalingUrl: String = "",
-    val turnServerUrl: String = "",
-    val turnUsername: String = "",
-    val turnPassword: String = "",
+    val relaySignalingUrl: String = RemoteRelayDefaults.SIGNALING_URL,
+    val turnServerUrl: String = RemoteRelayDefaults.TURN_URL,
+    val turnUsername: String = RemoteRelayDefaults.TURN_USERNAME,
+    val turnPassword: String = RemoteRelayDefaults.TURN_PASSWORD,
     val errorMessage: String? = null,
 )

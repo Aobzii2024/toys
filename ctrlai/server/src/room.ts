@@ -24,10 +24,10 @@ export class SessionManager {
   private peers = new Map<string, Peer>()
   private sessions = new Map<string, Session>()
 
-  register(deviceId: string, role: Role, socket: unknown, name?: string): { pairCode?: string; error?: SignalingMessage } {
+  register(deviceId: string, role: Role, socket: unknown, name?: string, pairCode?: string): { pairCode?: string; error?: SignalingMessage } {
     this.peers.set(deviceId, { deviceId, role, socket, name })
     if (role === 'controlled') {
-      const record = this.pairing.create(deviceId, name)
+      const record = this.pairing.create(deviceId, name, pairCode)
       return { pairCode: record.code }
     }
     return {}

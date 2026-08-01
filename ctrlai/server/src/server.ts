@@ -80,7 +80,7 @@ export class SignalingServer {
     }
     this.socketToDevice.set(socket, deviceId)
     this.deviceToSocket.set(deviceId, socket)
-    const result = this.sessions.register(deviceId, role, socket, message.name)
+    const result = this.sessions.register(deviceId, role, socket, message.name, message.pairCode)
     if (result.error) {
       send(socket, result.error)
       return

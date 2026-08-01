@@ -18,9 +18,11 @@ services:
     image: coturn/coturn:4.6
     command:
       - --listening-port=3478
+      - --listening-ip=0.0.0.0
+      - --external-ip=47.116.53.224
       - --fingerprint
       - --lt-cred-mech
-      - --user=${TURN_USERNAME:-ctrlai}:${TURN_PASSWORD:-change-me}
+      - --user=${TURN_USERNAME:-ctrlai}:${TURN_PASSWORD:-329664}
       - --realm=${TURN_REALM:-ctrlai}
       - --min-port=49160
       - --max-port=49200

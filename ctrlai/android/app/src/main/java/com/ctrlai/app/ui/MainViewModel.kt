@@ -54,6 +54,8 @@ class MainViewModel : ViewModel() {
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
     private var signalingClient: SignalingClient? = null
+    private var localSignalingClient: SignalingClient? = null
+    private var relaySignalingClient: SignalingClient? = null
     private var localServer: LocalSignalingServer? = null
     private var advertiser: LocalSessionAdvertiser? = null
     private var peerManager: PeerConnectionManager? = null
@@ -108,15 +110,21 @@ class MainViewModel : ViewModel() {
                 errorMessage = null,
             )
         }
-        val relayUrl = _uiState.value.relaySignalingUrl
-        if (relayUrl.isBlank()) {
-            localServer?.stop()
-            localServer = LocalSignalingServer(LOCAL_SIGNALING_PORT, pairCode).also { it.start() }
-            advertiser = LocalSessionAdvertiser(appContext).also { it.start(pairCode, LOCAL_SIGNALING_PORT) }
-            connectSignaling(role = "controlled", serverUrl = "ws://127.0.0.1:$LOCAL_SIGNALING_PORT/ws")
-        } else {
-            connectSignaling(role = "controlled", serverUrl = relayUrl)
-        }
+        localServer?.stop()
+        localServer = LocalSignalingServer(LOCAL_SIGNALING_PORT, pairCode).also { it.start() }
+        advertiser = LocalSessionAdvertiser(appContext).also { it.start(pairCode, LOCAL_SIGNALING_PORT) }
+        localSignalingClient = connectSignaling(
+            role = "controlled",
+            serverUrl = "ws://127.0.0.1:$LOCAL_SIGNALING_PORT/ws",
+            pairCode = pairCode,
+            replaceActive = true,
+        )
+        relaySignalingClient = connectSignaling(
+            role = "controlled",
+            serverUrl = _uiState.value.relaySignalingUrl,
+            pairCode = pairCode,
+            replaceActive = false,
+        )
     }
 
     fun connect(pairCode: String) {
@@ -127,12 +135,10 @@ class MainViewModel : ViewModel() {
         _uiState.update { it.copy(connectionState = ConnectionState.Connecting, errorMessage = null) }
         viewModelScope.launch {
             val appContext = context ?: return@launch
-            val relayUrl = _uiState.value.relaySignalingUrl
-            val serverUrl = relayUrl.ifBlank {
-                withTimeoutOrNull(DISCOVERY_TIMEOUT_MS) {
-                    LocalSessionDiscovery(appContext).find(pairCode)
-                }.orEmpty()
-            }
+            val localUrl = withTimeoutOrNull(DISCOVERY_TIMEOUT_MS) {
+                LocalSessionDiscovery(appContext).find(pairCode)
+            }.orEmpty()
+            val serverUrl = localUrl.ifBlank { _uiState.value.relaySignalingUrl }
             if (serverUrl.isBlank()) {
                 _uiState.update {
                     it.copy(
@@ -143,13 +149,13 @@ class MainViewModel : ViewModel() {
                 return@launch
             }
             pendingPairCode = pairCode
-            connectSignaling(role = "controller", serverUrl = serverUrl)
+            connectSignaling(role = "controller", serverUrl = serverUrl, replaceActive = true)
         }
     }
 
     fun stopControlling() {
         viewModelScope.launch {
-            signalingClient?.send(SignalingMessage(type = "disconnect"))
+            sendDisconnectToAllClients()
         }
         pendingPairCode = null
         teardownWebRtc()
@@ -158,7 +164,7 @@ class MainViewModel : ViewModel() {
 
     fun stopBeingControlled() {
         viewModelScope.launch {
-            signalingClient?.send(SignalingMessage(type = "disconnect"))
+            sendDisconnectToAllClients()
         }
         stopLocalSession()
         teardownWebRtc()
@@ -264,33 +270,42 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    private fun connectSignaling(role: String, serverUrl: String) {
-        val appContext = context ?: return
+    private fun connectSignaling(
+        role: String,
+        serverUrl: String,
+        replaceActive: Boolean,
+        pairCode: String? = null,
+    ): SignalingClient {
+        val appContext = context ?: throw IllegalStateException("缺少应用上下文")
         currentRole = role
         val client = SignalingClient(
             serverUrl = serverUrl,
             deviceId = DeviceIdentity.deviceId(appContext),
             deviceName = DeviceIdentity.deviceName(appContext),
+            pairCode = pairCode,
         )
-        signalingClient?.close()
-        signalingClient = client
+        if (replaceActive) {
+            signalingClient?.close()
+            signalingClient = client
+        }
 
         viewModelScope.launch {
             val flow: Flow<SignalingEvent> = client.events
             flow.collect { event ->
-                handleSignalingEvent(event, role)
+                handleSignalingEvent(event, role, client)
             }
         }
         client.connect(role)
+        return client
     }
 
-    private fun handleSignalingEvent(event: SignalingEvent, role: String) {
+    private fun handleSignalingEvent(event: SignalingEvent, role: String, client: SignalingClient) {
         when (event) {
             is SignalingEvent.Registered -> {
                 val pairCode = pendingPairCode
                 if (role == "controller" && pairCode != null) {
                     viewModelScope.launch {
-                        signalingClient?.send(SignalingMessage(type = "connect", pairCode = pairCode))
+                        client.send(SignalingMessage(type = "connect", pairCode = pairCode))
                     }
                 }
             }
@@ -301,6 +316,7 @@ class MainViewModel : ViewModel() {
             }
 
             is SignalingEvent.Connected -> {
+                signalingClient = client
                 _uiState.update {
                     it.copy(
                         connectionState = ConnectionState.Connected,
@@ -310,6 +326,7 @@ class MainViewModel : ViewModel() {
             }
 
             is SignalingEvent.PeerJoined -> {
+                signalingClient = client
                 _uiState.update {
                     it.copy(isPeerConnected = true, remoteName = event.remote.name ?: event.remote.deviceId)
                 }
@@ -511,6 +528,18 @@ class MainViewModel : ViewModel() {
         advertiser = null
         localServer?.stop()
         localServer = null
+        localSignalingClient?.close()
+        localSignalingClient = null
+        relaySignalingClient?.close()
+        relaySignalingClient = null
+        signalingClient = null
+    }
+
+    private suspend fun sendDisconnectToAllClients() {
+        val message = SignalingMessage(type = "disconnect")
+        runCatching { signalingClient?.send(message) }
+        runCatching { localSignalingClient?.send(message) }
+        runCatching { relaySignalingClient?.send(message) }
     }
 
     private fun teardownWebRtc() {

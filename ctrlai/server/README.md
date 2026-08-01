@@ -7,8 +7,8 @@ This directory contains the public signaling service and TURN relay configuratio
 Point a domain name to the public server that runs this stack. The Android app should use:
 
 ```text
-wss://your-domain.example/ws
-turn:your-domain.example:3478
+ws://47.116.53.224:8080/ws
+turn:47.116.53.224:3478
 ```
 
 ## Environment
@@ -24,7 +24,7 @@ LOG_LEVEL=info
 
 # TURN relay
 TURN_USERNAME=ctrlai
-TURN_PASSWORD=change-this-password
+TURN_PASSWORD=329664
 TURN_REALM=ctrlai
 ```
 
@@ -40,10 +40,10 @@ docker compose up -d
 Fill the same values on both Android devices:
 
 ```text
-公网信令地址: wss://your-domain.example/ws
-TURN 地址: turn:your-domain.example:3478
+公网信令地址: ws://47.116.53.224:8080/ws
+TURN 地址: turn:47.116.53.224:3478
 TURN 用户: ctrlai
-TURN 密码: change-this-password
+TURN 密码: 329664
 ```
 
-Leave these fields empty for LAN or hotspot mode.
+The current Android APK uses these relay values by default. LAN or hotspot mode is attempted before relay fallback.

@@ -14,6 +14,10 @@ function generateCode(): string {
   return String(Math.floor(100000 + Math.random() * 900000))
 }
 
+function isValidCode(code: string): boolean {
+  return /^\d{6}$/.test(code)
+}
+
 /**
  * 配对码管理器。被控端注册时生成 6 位配对码，控制端连接时校验。
  * 配对码一次性有效，校验成功后立即失效，防止重放攻击。
@@ -21,10 +25,11 @@ function generateCode(): string {
 export class PairingManager {
   private records = new Map<string, PairingRecord>()
 
-  create(deviceId: string, name?: string): PairingRecord {
+  create(deviceId: string, name?: string, preferredCode?: string): PairingRecord {
     this.purgeExpired()
+    const code = preferredCode && isValidCode(preferredCode) ? preferredCode : generateCode()
     const record: PairingRecord = {
-      code: generateCode(),
+      code,
       deviceId,
       name,
       expireAt: Date.now() + CODE_TTL_MS,
