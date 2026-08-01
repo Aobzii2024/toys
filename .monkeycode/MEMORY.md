@@ -47,3 +47,14 @@ Entries discovered by the Agent during task execution should follow this format:
   - Build command: `./gradlew :app:assembleDebug`.
   - JVM test command: `./gradlew :app:testDebugUnitTest`.
   - Local build environment needs JDK 17 and Android SDK path `/usr/lib/android-sdk` in `local.properties`.
+
+[Project Knowledge Summary]
+- Date: 2026-08-01
+- Context: Discovered by Agent while building the Android APK for keepmee
+- Category: Build Methods
+- Instructions:
+  - The shared Android toolchain in this environment: JDK 17 at `/usr/lib/jvm/java-17-openjdk-amd64`, Android SDK at `/opt/android-sdk` (platforms;android-35, build-tools 35.0.0, 34.0.0, platform-tools).
+  - Gradle wrapper 8.9 downloads automatically on first build; Kotlin daemon may fail to start in this container and fallback to in-process compilation (harmless, just slow).
+  - Build command from `/workspace/keepmee/android`: `./gradlew :app:assembleDebug --no-daemon`. APK output: `app/build/outputs/apk/debug/app-debug.apk`.
+  - Test command: `./gradlew :app:testDebugUnitTest --no-daemon`.
+  - AGP 8.7.3 auto-installs its required build-tools version (34.0.0) on first run.
