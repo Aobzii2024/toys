@@ -52,8 +52,13 @@ dependencies {
 
     implementation("io.ktor:ktor-client-okhttp:3.0.3")
     implementation("io.ktor:ktor-client-websockets:3.0.3")
+    implementation("io.ktor:ktor-server-core:3.0.3")
+    implementation("io.ktor:ktor-server-cio:3.0.3")
+    implementation("io.ktor:ktor-server-websockets:3.0.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
     implementation("io.getstream:stream-webrtc-android:1.3.9")
+
+    testImplementation("junit:junit:4.13.2")
 }

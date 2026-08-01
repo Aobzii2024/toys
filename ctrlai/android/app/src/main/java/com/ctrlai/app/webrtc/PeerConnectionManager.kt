@@ -16,6 +16,7 @@ import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.PeerConnectionFactory
 import org.webrtc.RtpReceiver
+import org.webrtc.SdpObserver
 import org.webrtc.ScreenCapturerAndroid
 import org.webrtc.SessionDescription
 import org.webrtc.SurfaceTextureHelper
@@ -30,10 +31,12 @@ import org.webrtc.VideoTrack
 class PeerConnectionManager(
     private val context: Context,
     private val eglBase: EglBase,
+    private val iceServers: List<PeerConnection.IceServer> = emptyList(),
 ) {
     companion object {
         private const val TAG = "PeerConnectionManager"
         private const val MAX_BITRATE_BPS = 3_000_000
+        @Volatile private var isFactoryInitialized = false
     }
 
     private lateinit var factory: PeerConnectionFactory
@@ -56,6 +59,17 @@ class PeerConnectionManager(
     var onLocalStreamReady: ((VideoTrack) -> Unit)? = null
 
     fun initialize() {
+        if (!isFactoryInitialized) {
+            synchronized(PeerConnectionManager::class.java) {
+                if (!isFactoryInitialized) {
+                    PeerConnectionFactory.initialize(
+                        PeerConnectionFactory.InitializationOptions.builder(context)
+                            .createInitializationOptions(),
+                    )
+                    isFactoryInitialized = true
+                }
+            }
+        }
         factory = PeerConnectionFactory.builder().createPeerConnectionFactory()
     }
 
@@ -67,11 +81,12 @@ class PeerConnectionManager(
         }
     }
 
+    fun ensurePeerConnection(): PeerConnection {
+        return peerConnection ?: createPeerConnection().also { peerConnection = it }
+    }
+
     private fun createPeerConnection(): PeerConnection {
-        val config = PeerConnection.RTCConfiguration(emptyList())
-        config.iceServers = listOf(
-            PeerConnection.IceServer.builder("stun:stun.l.google.com:19302").createIceServer(),
-        )
+        val config = PeerConnection.RTCConfiguration(iceServers)
         return factory.createPeerConnection(config, observer())!!
     }
 
@@ -132,7 +147,7 @@ class PeerConnectionManager(
     fun startScreenCaptureAndAddTracks(): VideoTrack {
         val intent = projectionIntent
             ?: throw IllegalStateException("缺少屏幕采集授权")
-        val pc = peerConnection ?: createPeerConnection().also { peerConnection = it }
+        val pc = ensurePeerConnection()
 
         videoSource = factory.createVideoSource(false)
         capturer = ScreenCapturerAndroid(intent, object : android.media.projection.MediaProjection.Callback() {
@@ -159,7 +174,7 @@ class PeerConnectionManager(
 
     /** 创建 DataChannel */
     fun createDataChannel(label: String): DataChannel {
-        val pc = peerConnection ?: throw IllegalStateException("PeerConnection 未初始化")
+        val pc = ensurePeerConnection()
         val init = DataChannel.Init()
         init.ordered = true
         init.id = 1
@@ -171,7 +186,7 @@ class PeerConnectionManager(
 
     fun setLocalDescription(sdp: SessionDescription): CompletableDeferred<Unit> {
         val result = CompletableDeferred<Unit>()
-        peerConnection?.setLocalDescription(object : org.webrtc.SdpObserver {
+        peerConnection?.setLocalDescription(object : SdpObserver {
             override fun onCreateSuccess(desc: SessionDescription) {}
 
             override fun onSetSuccess() {
@@ -191,7 +206,7 @@ class PeerConnectionManager(
 
     fun setRemoteDescription(sdp: SessionDescription): CompletableDeferred<Unit> {
         val result = CompletableDeferred<Unit>()
-        peerConnection?.setRemoteDescription(object : org.webrtc.SdpObserver {
+        peerConnection?.setRemoteDescription(object : SdpObserver {
             override fun onCreateSuccess(desc: SessionDescription) {}
 
             override fun onSetSuccess() {
@@ -209,7 +224,7 @@ class PeerConnectionManager(
 
     fun createOffer(): CompletableDeferred<SessionDescription> {
         val result = CompletableDeferred<SessionDescription>()
-        peerConnection?.createOffer(object : org.webrtc.SdpObserver {
+        peerConnection?.createOffer(object : SdpObserver {
             override fun onCreateSuccess(desc: SessionDescription) {
                 result.complete(desc)
             }
@@ -227,7 +242,7 @@ class PeerConnectionManager(
 
     fun createAnswer(): CompletableDeferred<SessionDescription> {
         val result = CompletableDeferred<SessionDescription>()
-        peerConnection?.createAnswer(object : org.webrtc.SdpObserver {
+        peerConnection?.createAnswer(object : SdpObserver {
             override fun onCreateSuccess(desc: SessionDescription) {
                 result.complete(desc)
             }

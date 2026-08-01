@@ -3,10 +3,13 @@ package com.ctrlai.app.input
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
 import android.graphics.Path
-import android.graphics.Rect
-import android.os.SystemClock
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
+import android.content.ClipboardManager
+import android.content.Context
+import com.ctrlai.app.webrtc.RemoteInputEvent
+import com.ctrlai.app.webrtc.RemoteProtocol
+import java.lang.ref.WeakReference
 
 /**
  * 远程输入注入服务。通过无障碍手势 API 将控制端事件注入到屏幕坐标。
@@ -16,6 +19,7 @@ class RemoteAccessibilityService : AccessibilityService() {
 
     companion object {
         private const val TAG = "RemoteAccessibility"
+        private var instanceRef: WeakReference<RemoteAccessibilityService>? = null
 
         /** 归一化坐标 -> 屏幕真实坐标 */
         fun normalizePoint(x: Float, y: Float, screenWidth: Int, screenHeight: Int): Pair<Int, Int> {
@@ -23,6 +27,8 @@ class RemoteAccessibilityService : AccessibilityService() {
             val py = (y * screenHeight).toInt().coerceIn(0, screenHeight - 1)
             return px to py
         }
+
+        fun instance(): RemoteAccessibilityService? = instanceRef?.get()
     }
 
     var isEnabled = false
@@ -31,6 +37,7 @@ class RemoteAccessibilityService : AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
         isEnabled = true
+        instanceRef = WeakReference(this)
         Log.d(TAG, "accessibility connected")
     }
 
@@ -40,7 +47,21 @@ class RemoteAccessibilityService : AccessibilityService() {
 
     override fun onDestroy() {
         isEnabled = false
+        if (instanceRef?.get() === this) {
+            instanceRef = null
+        }
         super.onDestroy()
+    }
+
+    fun applyRemoteEvent(event: RemoteInputEvent) {
+        if (!isEnabled) return
+        when (event.type) {
+            RemoteProtocol.TYPE_TOUCH -> injectTap(event.x, event.y)
+            RemoteProtocol.TYPE_SWIPE -> injectSwipe(event.x, event.y, event.toX, event.toY, event.durationMs)
+            RemoteProtocol.TYPE_KEY -> injectKey(event.keyCode)
+            RemoteProtocol.TYPE_TEXT, RemoteProtocol.TYPE_CLIPBOARD -> event.text?.let { syncClipboard(it) }
+            RemoteProtocol.TYPE_FILE_START, RemoteProtocol.TYPE_FILE_CHUNK, RemoteProtocol.TYPE_FILE_END -> Unit
+        }
     }
 
     private fun dispatchGesturePath(
@@ -83,5 +104,10 @@ class RemoteAccessibilityService : AccessibilityService() {
     fun injectKey(globalAction: Int) {
         if (!isEnabled) return
         performGlobalAction(globalAction)
+    }
+
+    private fun syncClipboard(text: String) {
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        clipboard.setPrimaryClip(android.content.ClipData.newPlainText("remote", text))
     }
 }

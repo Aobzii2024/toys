@@ -30,6 +30,14 @@ fun MainScreen(
                     state.isControlling -> ControllerScreen(
                         state = state,
                         onDisconnect = viewModel::stopControlling,
+                        onConnect = viewModel::connect,
+                        onResetConnection = viewModel::resetControllerConnection,
+                        onTap = viewModel::sendControllerTap,
+                        onSwipe = viewModel::sendControllerSwipe,
+                        onKey = viewModel::sendControllerKey,
+                        onSendClipboard = viewModel::sendControllerClipboard,
+                        onSendFile = viewModel::sendControllerFile,
+                        onToggleFullScreen = viewModel::toggleFullScreen,
                     )
                     state.isControlled -> ControlledScreen(
                         state = state,
@@ -38,8 +46,10 @@ fun MainScreen(
                         accessibilityEnabled = accessibilityEnabled,
                     )
                     else -> ModeSelectScreen(
+                        state = state,
                         onControllerClick = viewModel::startControlling,
                         onControlledClick = viewModel::startBeingControlled,
+                        onRelayConfigChange = viewModel::updateRelayConfig,
                     )
                 }
             }

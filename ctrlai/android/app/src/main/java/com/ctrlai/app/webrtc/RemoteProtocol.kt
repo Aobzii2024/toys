@@ -17,6 +17,14 @@ data class RemoteInputEvent(
     val toY: Float = 0f,
     val durationMs: Long = 0L,
     val keyCode: Int = 0,
+    val text: String? = null,
+    val transferId: String? = null,
+    val fileName: String? = null,
+    val mimeType: String? = null,
+    val size: Long = 0L,
+    val chunkIndex: Int = 0,
+    val totalChunks: Int = 0,
+    val dataBase64: String? = null,
 )
 
 object RemoteProtocol {
@@ -24,6 +32,10 @@ object RemoteProtocol {
     const val TYPE_SWIPE = "swipe"
     const val TYPE_KEY = "key"
     const val TYPE_TEXT = "text"
+    const val TYPE_CLIPBOARD = "clipboard"
+    const val TYPE_FILE_START = "file-start"
+    const val TYPE_FILE_CHUNK = "file-chunk"
+    const val TYPE_FILE_END = "file-end"
 
     val json = Json { ignoreUnknownKeys = true }
 
